@@ -1,0 +1,114 @@
+<?xml version="1.0"?>
+
+<!--
+  - $Id$
+  -
+  - Ant build script for SaverScreens project.
+  -->
+<project name="SaverScreens" basedir="." default="package">
+
+    <property name="project.version" value="0.9"/>
+    <property name="source.dir" location="source"/>
+    <property name="test.source.dir" location="test"/>
+    <property name="output.dir" location="bin"/>
+    <property name="package.dir" location="build"/>
+    <property name="package.file" value="saverscreens.jar"/>
+    <property name="apiPackage.file" value="saverscreens-api.jar"/>
+    <property name="javadoc.dir" location="docs/api"/>
+    <property name="javadoc.packages" value="net.fortuna.saverscreens.*"/>
+    <property name="dist.dir" location=".."/>
+    <property name="dist.name" value="saverscreens"/>
+    <property name="saverbeans.dir" location="c:/libs/saverbeans-sdk-0.1.1"/>
+      
+    <target name="define" description="Define custom tasks">
+        <taskdef name="foreachscreensaver" 
+          classname="org.jdesktop.jdic.screensaver.autogen.ForEachScreensaver"
+          classpath="${saverbeans.dir}/saverbeans-ant.jar" />
+    </target>
+    
+    <target name="clean-compile">
+        <mkdir dir="${output.dir}"/>
+        <delete>
+            <fileset dir="${output.dir}"/>
+        </delete>
+    </target>
+    
+    <target name="compile">
+        <javac srcdir="${source.dir}" destdir="${output.dir}" classpath="lib/saverbeans-api.jar" debug="false" deprecation="true"/>
+    </target>
+    
+    <target name="compile-tests">
+        <javac srcdir="${test.source.dir}" destdir="${output.dir}" classpath="lib/saverbeans-api.jar;${output.dir}" debug="false" deprecation="true"/>
+    </target>
+    
+    <target name="clean-package">
+        <mkdir dir="${package.dir}"/>
+        <delete>
+            <fileset dir="${package.dir}"/>
+        </delete>
+    </target>
+    
+    <target name="package" depends="define, compile, clean-package">
+        <!-- Generate Windows .scr and binary distribution for each -->
+        <mkdir dir="build/win32" />
+        <foreachscreensaver confDir="etc/conf" outDir="build/win32" os="win32"/>
+        <foreachscreensaver confDir="etc/conf" outDir="build/unix" os="unix"/>
+
+        <mkdir dir="etc"/>
+        <manifest file="etc/manifest.mf">
+            <!-- Add manifest attributes here.. -->
+            <attribute name="Class-Path" value="saverbeans-api.jar vrml97.jar StarfireExt.jar" />
+        </manifest>
+        <jar basedir="${output.dir}" compress="true" jarfile="${package.dir}/${apiPackage.file}" manifest="etc/manifest.mf"/>
+        <jar compress="true" jarfile="${package.dir}/${package.file}" manifest="etc/manifest.mf">
+            <fileset dir="${output.dir}"/>
+            <fileset dir="etc" includes="models/**"/>
+        </jar>      
+    </target>
+    
+    <target name="clean-javadoc">
+        <mkdir dir="${javadoc.dir}"/>
+        <delete>
+            <fileset dir="${javadoc.dir}"/>
+        </delete>
+    </target>
+    
+    <target name="javadoc" depends="clean-javadoc">
+        <javadoc sourcepath="${source.dir}"
+                 destdir="${javadoc.dir}"
+                 packagenames="${javadoc.packages}"
+                 Windowtitle="${ant.project.name}"
+                 Doctitle="${ant.project.name}"
+                 Overview="etc/overview.html"
+                 classpath="lib/saverbeans-api.jar">
+        </javadoc>
+    </target>
+
+    <target name="dist-src" depends="clean-compile, clean-package, javadoc">
+        <zip zipfile="${dist.dir}/${dist.name}-${project.version}-src.zip">
+            <zipfileset dir="." prefix="${dist.name}-${project.version}"/>
+        </zip>
+    </target>
+
+    <target name="dist" depends="package, javadoc">
+        <zip zipfile="${dist.dir}/${dist.name}-${project.version}.zip">
+            <zipfileset dir="." prefix="${dist.name}-${project.version}" includes="LICENSE,CHANGELOG,README"/>
+            <zipfileset dir="docs" prefix="${dist.name}-${project.version}/docs"/>
+            <zipfileset dir="${package.dir}" prefix="${dist.name}-${project.version}/lib"/>
+            <zipfileset dir="lib" prefix="${dist.name}-${project.version}/lib"/>
+        </zip>
+    </target>
+    
+    <target name="changelog">
+        <cvschangelog destfile="etc/CHANGES"/>
+    </target>
+    
+    <target name="run-tests" depends="compile, compile-tests">
+        <junit printsummary="yes" showoutput="yes" fork="yes">
+            <classpath>
+                <pathelement location="lib/saverbeans-api.jar"/>
+                <pathelement location="${output.dir}"/>
+            </classpath>
+        </junit>
+    </target>
+</project>

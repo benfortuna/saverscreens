@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  - xscreensaver-style configuration file for Bounce screensaver.
+  -->
+<screensaver name="Bounce" _label="Bounce (Java)">
+
+  <command arg="-root"/>
+  
+  <command arg="-jar saverscreens.jar"/>
+  
+  <command arg="-class net.fortuna.saverscreens.bounce.Bounce"/>
+  
+  <file id="jdkhome" _label="Java Home (blank=auto)" arg="-jdkhome %" />
+  
+  <_description>
+Bouncing objects.
+  </_description>
+</screensaver>

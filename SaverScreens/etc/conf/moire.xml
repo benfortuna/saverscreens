@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  - xscreensaver-style configuration file for Moire screensaver.
+  -->
+<screensaver name="Moire" _label="Moire (Java)">
+
+  <command arg="-root"/>
+  
+  <command arg="-jar saverscreens.jar"/>
+  
+  <command arg="-class net.fortuna.saverscreens.moire.Moire"/>
+  
+  <file id="jdkhome" _label="Java Home (blank=auto)" arg="-jdkhome %" />
+  
+  <_description>
+The "Hello World" of screensavers.
+  </_description>
+</screensaver>
